@@ -1,0 +1,30 @@
+repos:
+  # Basic hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-yaml
+
+  # Detect secrets early (optional but recommended)
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: '^(.git/|.terraform/)'
+
+  # Terraform helpers (fmt/validate/tflint/docs)
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.92.0
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+      - id: terraform_tflint
+        args:
+          - --args=--enable-rule=terraform_documented_variables
+          - --args=--enable-rule=terraform_documented_outputs
+      # enable if you want auto-generated README blocks for modules later
+      # - id: terraform_docs

@@ -1,0 +1,22 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+terraform.tfvars
+terraform.tfvars.json
+
+# Module/package caches
+*.zip
+*.tgz
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

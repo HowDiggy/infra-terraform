@@ -1,1 +1,4 @@
-# Add outputs as you discover useful values (IP, MAC, etc.).
+output "hello_vm_ip" {
+  description = "IP address of the hello-noble VM"
+  value       = try(libvirt_domain.hello.network_interface[0].addresses[0], null)
+}

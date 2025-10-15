@@ -20,3 +20,7 @@ terraform.tfvars.json
 Thumbs.db
 .idea/
 .vscode/
+
+# local libvirt images (binary, large)
+envs/local-libvirt/images/*
+!envs/local-libvirt/images/.gitkeep

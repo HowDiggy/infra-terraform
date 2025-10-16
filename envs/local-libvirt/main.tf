@@ -3,7 +3,7 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "~> 0.7"
+      version = "~> 0.8.3"
     }
   }
 }
@@ -12,18 +12,11 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-resource "libvirt_volume" "ubuntu_base" {
-  name   = "ubuntu-noble-base.qcow2"
+resource "libvirt_volume" "ubuntu_disk" {
+  name   = "hello-noble.qcow2"
   pool   = "default"
   source = "${path.module}/images/noble-server-cloudimg-amd64.img"
   format = "qcow2"
-}
-
-resource "libvirt_volume" "ubuntu_disk" {
-  name           = "hello-noble.qcow2"
-  pool           = "default"
-  base_volume_id = libvirt_volume.ubuntu_base.id
-  size           = 20 * 1024 * 1024 * 1024
 }
 
 locals {
@@ -46,10 +39,27 @@ resource "libvirt_cloudinit_disk" "hello_ci" {
     package_update: true
     packages:
       - qemu-guest-agent
+    runcmd:
+      - systemctl enable --now qemu-guest-agent
   EOT
 
+    # NetworkConfig v2 with MAC match so it applies regardless of interface name
+  network_config = <<-EONET
+    version: 2
+    ethernets:
+      nic0:
+        match:
+          macaddress: 52:54:00:0a:24:18
+        set-name: ens3
+        dhcp4: false
+        addresses: [192.168.1.164/24]
+        gateway4: 192.168.1.1
+        nameservers:
+          addresses: [1.1.1.1,8.8.8.8]
+  EONET
+
   meta_data = <<-EOT
-    instance-id: hello-noble
+    instance-id: hello-noble-static1
     local-hostname: hello-noble
   EOT
 }
@@ -59,11 +69,15 @@ resource "libvirt_domain" "hello" {
   memory = var.vm_memory_mb
   vcpu   = var.vm_vcpu
 
+  # Let libvirt expose the virtio-serial channel for qemu-guest-agent
+  qemu_agent = true
+
   cloudinit = libvirt_cloudinit_disk.hello_ci.id
 
   network_interface {
-    bridge          = "br0"
-    wait_for_lease  = true
+    bridge         = "br0"
+    mac            = "52:54:00:0a:24:18"
+    wait_for_lease = false
   }
 
   disk {
@@ -82,3 +96,4 @@ resource "libvirt_domain" "hello" {
     target_port = "0"
   }
 }
+

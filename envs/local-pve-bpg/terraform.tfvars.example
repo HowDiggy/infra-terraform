@@ -1,0 +1,11 @@
+# This is an example file.
+# DO NOT commit your real 'terraform.tfvars' file.
+# We will pass the token via environment variable,
+# but you could also create a 'terraform.tfvars' file
+# (and add it to .gitignore) with this content:
+#
+# proxmox_api_token = "terraform-prov@pve!my-token-name=YOUR-SECRET-UUID"
+#
+# Non-sensitive variables can be set here too:
+# vm_hostname = "my-test-vm"
+# proxmox_node = "pve"

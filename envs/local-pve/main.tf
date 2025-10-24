@@ -56,8 +56,9 @@ resource "proxmox_vm_qemu" "hello_vm" {
   # This block defines one network card (net0)
   network {
     id      = 0 # REQUIRED in v3.x (for net0)
-    model   = "virtIO"
+    model   = "virtio"
     bridge  = "vmbr0" # Assumes vmbr0 is your main bridge
+    firewall = false
   }
 
   # --- Storage ---
@@ -72,6 +73,22 @@ resource "proxmox_vm_qemu" "hello_vm" {
   # --- Cloud-Init ---
   # 'ipconfig0' sets the first network card (net0) to use DHCP.
   ipconfig0 = "ip=dhcp"
+  # >>> These three lines stop Terraform from "losing" CI/console
+  boot  = "order=scsi0;net0"
+  
+  vga {
+    type = "serial0"
+  }
+  
+  serial {
+    id   = 0
+    type = "socket"
+  }
+  onboot = true
+
+  cicustom = "user=local:snippets/keep-ci.yaml"
+
+
 
   # This is the most important part. We inject your
   # public SSH key so you can log in as the default user.
